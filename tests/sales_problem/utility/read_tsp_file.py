@@ -14,5 +14,5 @@ def read_text(file):
 
 def read_json(file):
     with open(file, 'r') as f:
-        data = json.load(file)
+        data = json.load(f)
     return [(int(j.x), int(j.y)) for j in data]

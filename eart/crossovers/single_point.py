@@ -4,12 +4,11 @@ import numpy as np
 from ..indivisual import Individual
 
 
-class SinglePoint:
-    def __init__(self, gene_size):
-        self._gene_size = gene_size
-    
-    def __call__(self, parent1, parent2, id1, id2, generation):
-        point = np.random.randint(0, self._gene_size)
-        child1 = Individual(id1, np.hstack((parent1[:point], parent2[point])), generation)
-        child2 = Individual(id2, np.hstack((parent2[:point], parent1[point])), generation)
-        return child1, child2
+def single_point_crossover(parent1, parent2, generation):
+    gene_size = min(len(parent1.gene), len(parent2.gene))
+    point = np.random.randint(0, gene_size)
+    child_gene1 = parent1.gene[:point] + parent2.gene[point:]
+    child_gene2 = parent2.gene[:point] + parent1.gene[point:]
+    child1 = Individual.new(child_gene1, generation)
+    child2 = Individual.new(child_gene2, generation)
+    return child1, child2

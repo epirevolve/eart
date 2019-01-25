@@ -3,6 +3,6 @@
 from ..indivisual import Individual
 
 
-class Whole:
-    def __call__(self, individual):
-        return Individual(individual.id, len(individual.gene), individual.born_at)
+def whole_mutation(individual):
+    individual = Individual.protobiont(individual.born_at)
+    return individual

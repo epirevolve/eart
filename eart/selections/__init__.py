@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .elite import Elite
-from .roulette import Roulette
-from .tournament import Tournament
+from .elite import elite_selection
+from .roulette import roulette_selection
+from .tournament import tournament_selection

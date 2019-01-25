@@ -20,4 +20,4 @@ class DisplayCanvas:
 
     def draw_point(self, path):
         for x, y in path:
-            self._canvas.create_oval(x - 4, y - 4, x + 4, y + 4, fill ="green")
+            self._canvas.create_oval(x - 4, y - 4, x + 4, y + 4, fill="green")

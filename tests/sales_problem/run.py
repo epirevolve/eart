@@ -5,9 +5,6 @@ import time
 import tkinter
 import argparse
 from eart.genetic import Genetic
-from eart.selections import Tournament
-from eart.mutations import Inverting
-from eart.crossovers import Circuit
 from tests.sales_problem.utility import read_tsp_file as rtf
 from tests.sales_problem.utility.draw_canvas import DisplayCanvas
 
@@ -43,7 +40,11 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--file")
     param_args = parser.parse_args()
 
+    print('start sales problem')
+
     point_table = rtf.read_text(param_args.file)
+    print('{} points are inputted as city'.format(len(point_table)))
+
     root = tkinter.Tk()
 
     max_x = max([x[0] for x in point_table]) + 20
@@ -51,17 +52,18 @@ if __name__ == "__main__":
 
     canvas = DisplayCanvas(root, max_x, max_y)
     evaluation = Evaluation(point_table).evaluate
-    genetic = Genetic(len(point_table), evaluation,
-                      Tournament(3), Inverting(), Circuit())
-    genetic.make_protobiont()
-
+    genetic = Genetic(gene_kind=range(len(point_table)), evaluation=evaluation,
+                      homo_progeny_restriction=True)
+    i = genetic.make_protobiont()
+    canvas.draw_point([point_table[i] for i in i.gene])
+    canvas.draw_path([point_table[i] for i in i.gene])
+    print("era: {:>4}, adaptability: {}, elapsed time {}".format(genetic.era, i.adaptability, 0))
+    
     s = time.clock()
-
+    
     for i in genetic():
-        if genetic.era == 1:
-            canvas.draw_point([point_table[i] for i in i.gene])
         canvas.draw_path([point_table[i] for i in i.gene])
-        print("era: {:>4}, adaptability: {}".format(genetic.era, i.adaptability))
+        print("era: {:>4}, adaptability: {}, elapsed time {}".format(genetic.era, i.adaptability, time.clock() - s))
 
     print("elapsed time:{}".format(time.clock() - s))
 
