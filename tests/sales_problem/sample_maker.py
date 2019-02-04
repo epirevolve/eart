@@ -3,10 +3,10 @@
 import random
 
 cities = []
-n_max = 100
+n_max = 300
 
 for n in range(n_max):
-    cities.append((random.randint(0, 750), random.randint(0, 750)))
+    cities.append((random.randint(0, 1500), random.randint(0, 750)))
 
 cities = set(cities)
 points = []

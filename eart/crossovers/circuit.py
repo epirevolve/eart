@@ -20,25 +20,27 @@ from ..indivisual import Individual
 #     child2 = Individual.new([c2 if c2 != '_' else p1_get() for c2 in cg2], generation)
 #     return child1, child2
 
-def _circuit(c, r, g1, g2):
-    c[r] = g1[r]
-    i = g1.index(g2[r])
-    c[i] = g1[i]
 
-
-def circuit_crossover(parent1, parent2, generation):
-    gene_size = min(len(parent1.gene), len(parent2.gene))
-    child_gene1 = ['_' for _ in range(gene_size)]
-    child_gene2 = ['_' for _ in range(gene_size)]
+class CircuitCrossover:
+    @staticmethod
+    def _circuit(c, r, g1, g2):
+        c[r] = g1[r]
+        i = g1.index(g2[r])
+        c[i] = g1[i]
     
-    while True:
-        r = np.random.randint(gene_size)
-        if parent1.gene[r] in child_gene1:
-            break
-        _circuit(child_gene1, r, parent1.gene, parent2.gene)
-        _circuit(child_gene2, r, parent2.gene, parent1.gene)
-    get_parent_gene1 = (x for x in parent1.gene if x not in child_gene1).__next__
-    get_parent_gene2 = (x for x in parent2.gene if x not in child_gene2).__next__
-    child1 = Individual.new([x if x != '_' else get_parent_gene2() for x in child_gene1], generation)
-    child2 = Individual.new([x if x != '_' else get_parent_gene1() for x in child_gene2], generation)
-    return child1, child2
+    def run(self, parent1, parent2, generation):
+        gene_size = min(len(parent1.gene), len(parent2.gene))
+        child_gene1 = ['_' for _ in range(gene_size)]
+        child_gene2 = ['_' for _ in range(gene_size)]
+        
+        while True:
+            r = np.random.randint(gene_size)
+            if parent1.gene[r] in child_gene1:
+                break
+            self._circuit(child_gene1, r, parent1.gene, parent2.gene)
+            self._circuit(child_gene2, r, parent2.gene, parent1.gene)
+        get_parent_gene1 = (x for x in parent1.gene if x not in child_gene1).__next__
+        get_parent_gene2 = (x for x in parent2.gene if x not in child_gene2).__next__
+        child1 = Individual.new([x if x != '_' else get_parent_gene2() for x in child_gene1], generation)
+        child2 = Individual.new([x if x != '_' else get_parent_gene1() for x in child_gene2], generation)
+        return child1, child2

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .inverting import invert_mutation
-from .translocating import translocate_mutation
-from .whole import whole_mutation
+from .inverting import InvertMutation
+from .translocating import TranslocateMutation
+from .whole import WholeMutation

@@ -4,7 +4,12 @@ import math
 import time
 import tkinter
 import argparse
-from eart.genetic import Genetic
+from eart import (
+    Genetic, MarriageSelection, TransitionSelection
+)
+from eart.selections import (
+    EliteSelection, TournamentSelection
+)
 from tests.sales_problem.utility import read_tsp_file as rtf
 from tests.sales_problem.utility.draw_canvas import DisplayCanvas
 
@@ -52,8 +57,15 @@ if __name__ == "__main__":
 
     canvas = DisplayCanvas(root, max_x, max_y)
     evaluation = Evaluation(point_table).evaluate
-    genetic = Genetic(gene_kind=range(len(point_table)), evaluation=evaluation,
-                      homo_progeny_restriction=True)
+    
+    genetic = Genetic(evaluation=evaluation,
+                      gene_kind=range(len(point_table)), homo_progeny_restriction=True)
+    marriage_selection = MarriageSelection(parent_shuffle=True, marriage_shuffle=True)
+    marriage_selection.add(EliteSelection(), 0.3)
+    marriage_selection.add(TournamentSelection(group_size=3), 0.7)
+    genetic.marriage_selection = marriage_selection
+    transition_selection = TransitionSelection(population_size=genetic.population_size)
+
     i = genetic.make_protobiont()
     canvas.draw_point([point_table[i] for i in i.gene])
     canvas.draw_path([point_table[i] for i in i.gene])

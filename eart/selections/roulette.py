@@ -3,8 +3,11 @@
 import numpy as np
 
 
-def roulette_selection(*args):
-    population, demand_count = args
-    s = sum([w.adaptability for w in population])
-    return np.random.choice(population, demand_count, replace=False,
-                            p=[w.adaptability / s for w in population])
+class RouletteSelection:
+    def __init__(self, require_count):
+        self._require_count = require_count
+    
+    def run(self, population):
+        s = sum([w.adaptability for w in population])
+        return np.random.choice(population, self._require_count, replace=False,
+                                p=[w.adaptability / s for w in population])

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-elite_rate = 0.05
 
-
-def elite_selection(*args):
-    population, *_ = args
-    return population[: int(elite_rate * len(population))]
+class EliteSelection:
+    def __init__(self, elite_rate=0.05):
+        self._elite_rate = elite_rate
+    
+    def run(self, population):
+        return population[:int(self._elite_rate * len(population))]
