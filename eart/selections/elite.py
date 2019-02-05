@@ -2,7 +2,7 @@
 
 
 class EliteSelection:
-    def __init__(self, elite_rate=0.05):
+    def __init__(self, elite_rate=1):
         self._elite_rate = elite_rate
     
     def run(self, population):

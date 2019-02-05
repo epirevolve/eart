@@ -5,10 +5,14 @@ import time
 import tkinter
 import argparse
 from eart import (
-    Genetic, MarriageSelection, TransitionSelection
+    Genetic, MarriageSelection, TransitionSelection,
+    Mutation
 )
 from eart.selections import (
     EliteSelection, TournamentSelection
+)
+from eart.mutations import (
+    InvertMutation, TranslocateMutation, WholeMutation
 )
 from tests.sales_problem.utility import read_tsp_file as rtf
 from tests.sales_problem.utility.draw_canvas import DisplayCanvas
@@ -60,12 +64,23 @@ if __name__ == "__main__":
     
     genetic = Genetic(evaluation=evaluation,
                       gene_kind=range(len(point_table)), homo_progeny_restriction=True)
-    marriage_selection = MarriageSelection(parent_shuffle=True, marriage_shuffle=True)
-    marriage_selection.add(EliteSelection(), 0.3)
-    marriage_selection.add(TournamentSelection(group_size=3), 0.7)
+    marriage_selection = MarriageSelection(selection_shuffle=True)
+    marriage_selection.add(EliteSelection(), 0.05)
+    marriage_selection.add(TournamentSelection(group_size=2))
+    marriage_selection.compile()
     genetic.marriage_selection = marriage_selection
-    transition_selection = TransitionSelection(population_size=genetic.population_size)
-
+    transition_selection = TransitionSelection(const_population_size=genetic.population_size)
+    transition_selection.add(EliteSelection(), 0.05)
+    transition_selection.add(TournamentSelection(group_size=3))
+    transition_selection.compile()
+    genetic.transition_selection = transition_selection
+    mutation = Mutation(proliferate_mutation=True)
+    mutation.add(WholeMutation(), 0.05)
+    mutation.add(InvertMutation(), 0.5)
+    mutation.add(TranslocateMutation())
+    mutation.compile()
+    genetic.mutation = mutation
+    
     i = genetic.make_protobiont()
     canvas.draw_point([point_table[i] for i in i.gene])
     canvas.draw_path([point_table[i] for i in i.gene])

@@ -1,29 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from ..background import BackFunction
 
 
-class Selection:
+class Selection(BackFunction):
     def __init__(self, *,
-                 parent_shuffle=False, marriage_shuffle=False):
-        self._parent_shuffle = parent_shuffle
-        self._marriage_shuffle = marriage_shuffle
-        
-        self._methods = {}
-    
-    def add(self, method, weight=None):
-        self._methods[type(method)] = (method, weight)
+                 random_group=False, selection_shuffle=False):
+        super(Selection, self).__init__()
+        self._random_group = random_group
+        self._selection_shuffle = selection_shuffle
 
     @staticmethod
     def _split_data(weights, data):
-        if sum([x or 0 for x in weights]) > 1:
-            raise ValueError('sum of weight must be less than 1')
-        none_count = weights.count(None)
-        if none_count:
-            r_weight = 1 - sum([x or 0 for x in weights]) / none_count
-            weights = [x or r_weight for x in weights]
-        if sum(weights) != 1:
-            raise ValueError('sum of weight must be 1')
         c_weights = [len(data) * x for x in weights]
         slices = [int(sum(c_weights[:i])) for i in range(1, len(c_weights))]
         return np.split(data, slices)
@@ -31,14 +20,16 @@ class Selection:
     def _run(self, population):
         if not self._methods:
             raise ValueError('selection is not assigned')
+        if not self._compiled:
+            raise ValueError('compile is required before run')
         survivors = []
         remains = population[:]
         methods, weights = zip(*self._methods.values())
-        if self._parent_shuffle:
+        if self._random_group:
             np.random.shuffle(remains)
         for method, data in zip(methods, self._split_data(weights, remains)):
             survivors.extend(method.run(data))
-        if self._marriage_shuffle:
+        if self._selection_shuffle:
             np.random.shuffle(survivors)
         return survivors
     
@@ -54,12 +45,18 @@ class MarriageSelection(Selection):
 
 
 class TransitionSelection(Selection):
-    def __init__(self, *, population_size,
-                 parent_shuffle=False, marriage_shuffle=False):
-        super(TransitionSelection, self).__init__(parent_shuffle=parent_shuffle,
-                                                  marriage_shuffle=marriage_shuffle)
-        self._population_size = population_size
+    def __init__(self, *, const_population_size=None,
+                 random_group=False, selection_shuffle=False):
+        super(TransitionSelection, self).__init__(random_group=random_group,
+                                                  selection_shuffle=selection_shuffle)
+        self._const_population_size = const_population_size
     
     def run(self, population):
         survivors = self._run(population)
+        if self._const_population_size:
+            remains = population[:]
+            while len(survivors) < self._const_population_size:
+                remains = list(set(remains) - set(survivors))
+                survivors.extend(self._run(remains))
+            survivors = survivors[:self._const_population_size]
         return survivors

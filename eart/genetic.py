@@ -2,14 +2,8 @@
 
 import numpy as np
 from .indivisual import Individual
-from .selections.selection import (
-    MarriageSelection, TransitionSelection
-)
 from .crossovers import (
-    CircuitCrossover, SinglePointCrossover
-)
-from .mutations import (
-    WholeMutation, TranslocateMutation, InvertMutation
+    CircuitCrossover, OrderlyCrossover
 )
 
 
@@ -46,8 +40,8 @@ class Genetic:
         
         self.marriage_selection = None
         self.transition_selection = None
-        self.mutations = None
-        self.crossovers = None
+        self.mutation = None
+        self.crossover = None
         
         self._individual_threshold = 0.90
         self._society_threshold = 0.85
@@ -76,17 +70,13 @@ Start Eart
         self._activators = [Individual.protobiont(self.era) for _ in range(self.population_size)]
 
     def _crossover(self, parent1, parent2):
-        _method = np.random.choice([SinglePointCrossover().run, CircuitCrossover().run])
+        _method = np.random.choice([OrderlyCrossover().run, CircuitCrossover().run])
         children = _method(parent1, parent2, self.era)
         if self._homo_progeny_restriction:
             for child in children:
                 if child.gene in [parent1.gene, parent2.gene]:
-                    self._mutate(child)
+                    self.mutation.run([child])
         return children
-    
-    def _mutate(self, child):
-        _method = np.random.choice([WholeMutation().run, InvertMutation().run, TranslocateMutation().run])
-        return _method(child)
     
     def _birth(self):
         _extend = self._activators.extend
@@ -94,13 +84,11 @@ Start Eart
         
         for parent1, parent2 in self.marriage_selection.run(self._activators):
             children = self._crossover(parent1, parent2)
-            if np.random.rand() < self._mutation_rate:
-                map(self._mutate, children)
+            self.mutation.run(children)
             _extend(children)
         
         self.era += 1
-        if self._proliferate_mutation and self._mutation_rate < self._proliferate_mutation_max:
-            self._mutation_rate += self._proliferate_mutation_rate
+        self.mutation.proliferate()
     
     def _evaluate(self):
         for i in self._activators:
@@ -111,12 +99,6 @@ Start Eart
 
     def _transition(self):
         self._activators = self.transition_selection.run(self._activators)
-        # population = self._activators[:]
-        # self._activators.clear()
-        # self._activators.extend(elite_selection(population))
-        # require_count = int((self._population_size - len(self._activators)) / 10)
-        # for i in np.split(np.array(population), 10):
-        #     self._activators.extend(roulette_selection(i, require_count))
     
     def _is_appeared_adaptable_individual(self):
         return max(self._activators, key=lambda m: m.adaptability) > self._individual_threshold
