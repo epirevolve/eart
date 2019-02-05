@@ -2,16 +2,14 @@
 
 import numpy as np
 from .indivisual import Individual
-from .crossovers import (
-    CircuitCrossover, OrderlyCrossover
-)
 
 
 class Genetic:
     def __init__(self, *, evaluation,
                  gene_kind, gene_size=None,
                  gene_duplicatable=False, homo_progeny_restriction=False,
-                 generation_size=100000, population_size=10000):
+                 generation_size=100000, population_size=10000,
+                 saturated_limit=10):
         self.era = 1
 
         self._adaptability_history = []
@@ -37,10 +35,7 @@ class Genetic:
         self.mutation = None
         self.crossover = None
         
-        self._individual_threshold = 0.90
-        self._society_threshold = 0.85
-        self._give_up_threshold = 0.001
-        self._until_give_up = 100
+        self._saturated_limit = saturated_limit
 
         print("""
 Start Eart
@@ -84,32 +79,42 @@ Start Eart
     def _transition(self):
         self._activators = self.transition_selection.run(self._activators)
     
-    def _is_appeared_adaptable_individual(self):
-        return max(self._activators, key=lambda m: m.adaptability) > self._individual_threshold
+    def _is_saturated(self):
+        return len(set(self._adaptability_history[:-self._saturated_limit])) == 1
 
-    def _is_appeared_adaptable_society(self):
-        return np.average([i.adaptability for i in self._activators]) > self._society_threshold
-
-    def _cant_evolute_more(self):
-        return False
-
-    def _excess_crossover(self):
+    def _is_excess_era(self):
         return self.era > self.generation_size
 
     def _is_terminate(self):
-        return self._cant_evolute_more() | self._excess_crossover()
+        return self._is_saturated() or self._is_excess_era()
 
-    def make_protobiont(self):
+    def init(self):
         self._generate_protobiont()
         self._evaluate()
         return self._adaptability_history[-1]
-
-    def __call__(self, *args, **kwargs):
+    
+    def _run(self):
+        self._birth()
+        self._evaluate()
+        self._transition()
+        return self._adaptability_history[-1]
+        
+    def run_by_step(self):
         try:
             for _ in range(self.generation_size):
-                self._birth()
-                self._evaluate()
-                self._transition()
-                yield self._adaptability_history[-1]
+                if self._is_terminate():
+                    break
+                yield self._run()
         except Exception as e:
             print(e)
+    
+    def run(self):
+        try:
+            for _ in range(self.generation_size):
+                if self._is_terminate():
+                    break
+                self._run()
+        except Exception as e:
+            print(e)
+        else:
+            return self._adaptability_history[-1]

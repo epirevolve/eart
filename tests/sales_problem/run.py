@@ -89,17 +89,17 @@ if __name__ == "__main__":
     crossover.compile()
     genetic.crossover = crossover
     
-    i = genetic.make_protobiont()
+    i = genetic.init()
     canvas.draw_point([point_table[i] for i in i.gene])
     canvas.draw_path([point_table[i] for i in i.gene])
     print("era: {:>4}, adaptability: {}, elapsed time {}".format(genetic.era, i.adaptability, 0))
     
     s = time.clock()
     
-    for i in genetic():
+    for i in genetic.run_by_step():
         canvas.draw_path([point_table[i] for i in i.gene])
         print("era: {:>4}, adaptability: {}, elapsed time {}".format(genetic.era, i.adaptability, time.clock() - s))
-
+    
     print("elapsed time:{}".format(time.clock() - s))
 
     root.mainloop()
