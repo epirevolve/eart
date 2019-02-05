@@ -26,7 +26,6 @@ class Mutation(BackFunction):
         method = np.random.choice(methods, p=weights)
         method.run(individual)
     
-    def run(self, individuals):
-        for individual in individuals:
-            if np.random.rand() < self._mutation_rate:
-                self._run(individual)
+    def run(self, individual):
+        if np.random.rand() < self._mutation_rate:
+            self._run(individual)

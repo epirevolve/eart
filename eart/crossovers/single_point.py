@@ -5,11 +5,9 @@ from ..indivisual import Individual
 
 
 class SinglePointCrossover:
-    def run(self, parent1, parent2, generation):
-        gene_size = min(len(parent1.gene), len(parent2.gene))
+    def run(self, gene1, gene2):
+        gene_size = min(len(gene1), len(gene2))
         point = np.random.randint(0, gene_size)
-        child_gene1 = parent1.gene[:point] + parent2.gene[point:]
-        child_gene2 = parent2.gene[:point] + parent1.gene[point:]
-        child1 = Individual.new(child_gene1, generation)
-        child2 = Individual.new(child_gene2, generation)
-        return child1, child2
+        gene3 = gene1[:point] + gene2[point:]
+        gene4 = gene2[:point] + gene1[point:]
+        return gene3, gene4

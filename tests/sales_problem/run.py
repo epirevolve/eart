@@ -6,13 +6,16 @@ import tkinter
 import argparse
 from eart import (
     Genetic, MarriageSelection, TransitionSelection,
-    Mutation
+    Mutation, Crossover
 )
 from eart.selections import (
     EliteSelection, TournamentSelection
 )
 from eart.mutations import (
     InvertMutation, TranslocateMutation, WholeMutation
+)
+from eart.crossovers import (
+    OrderlyCrossover, CircuitCrossover
 )
 from tests.sales_problem.utility import read_tsp_file as rtf
 from tests.sales_problem.utility.draw_canvas import DisplayCanvas
@@ -80,6 +83,11 @@ if __name__ == "__main__":
     mutation.add(TranslocateMutation())
     mutation.compile()
     genetic.mutation = mutation
+    crossover = Crossover()
+    crossover.add(OrderlyCrossover())
+    crossover.add(CircuitCrossover())
+    crossover.compile()
+    genetic.crossover = crossover
     
     i = genetic.make_protobiont()
     canvas.draw_point([point_table[i] for i in i.gene])

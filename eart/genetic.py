@@ -10,9 +10,8 @@ from .crossovers import (
 class Genetic:
     def __init__(self, *, evaluation,
                  gene_kind, gene_size=None,
-                 duplicatable=False, homo_progeny_restriction=False,
-                 proliferate_mutation=False, proliferate_mutation_max=0.1, proliferate_mutation_rate=0.0001,
-                 generation_size=100000, population_size=10000, mutation_rate=0.01):
+                 gene_duplicatable=False, homo_progeny_restriction=False,
+                 generation_size=100000, population_size=10000):
         self.era = 1
 
         self._adaptability_history = []
@@ -21,22 +20,17 @@ class Genetic:
         gene_kind = list(set(gene_kind))
         if not gene_size:
             gene_size = len(gene_kind)
-        self._duplicatable = duplicatable
+        self._gene_duplicatable = gene_duplicatable
         if len(gene_kind) != gene_size:
-            self._duplicatable = True
+            self._gene_duplicatable = True
         
         Individual.gene_kind = gene_kind
         Individual.gene_size = gene_size
         self._evaluation = evaluation
         self._homo_progeny_restriction = homo_progeny_restriction
-        self._proliferate_mutation = proliferate_mutation
-        self._proliferate_mutation_max = proliferate_mutation_max
-        self._proliferate_mutation_rate = proliferate_mutation_rate
         
         self.generation_size = generation_size
         self.population_size = population_size
-
-        self._mutation_rate = mutation_rate
         
         self.marriage_selection = None
         self.transition_selection = None
@@ -55,36 +49,26 @@ Start Eart
     gene size: {}
     duplicatable: {}
     homo progeny restriction: {}
-    proliferate mutation: {}
-    proliferate mutation max: {}
-    proliferate mutation rate: {}
     generation size: {}
     population size: {}
-    mutate rate: {}
-        """.format(Individual.gene_kind, Individual.gene_size, self._duplicatable,
-                   self._homo_progeny_restriction, self._proliferate_mutation,
-                   self._proliferate_mutation_max, self._proliferate_mutation_rate,
-                   self.generation_size, self.population_size, self._mutation_rate))
+        """.format(Individual.gene_kind, Individual.gene_size, self._gene_duplicatable,
+                   self._homo_progeny_restriction, self.generation_size, self.population_size))
 
     def _generate_protobiont(self):
         self._activators = [Individual.protobiont(self.era) for _ in range(self.population_size)]
 
-    def _crossover(self, parent1, parent2):
-        _method = np.random.choice([OrderlyCrossover().run, CircuitCrossover().run])
-        children = _method(parent1, parent2, self.era)
-        if self._homo_progeny_restriction:
-            for child in children:
-                if child.gene in [parent1.gene, parent2.gene]:
-                    self.mutation.run([child])
-        return children
-    
     def _birth(self):
         _extend = self._activators.extend
         np.random.shuffle(self._activators)
         
         for parent1, parent2 in self.marriage_selection.run(self._activators):
-            children = self._crossover(parent1, parent2)
-            self.mutation.run(children)
+            genes = self.crossover.run(parent1.gene, parent2.gene)
+            children = [Individual.new(x, self.era) for x in genes]
+            map(lambda x: self.mutation.run(x), children)
+            if self._homo_progeny_restriction:
+                for child in children:
+                    if child.gene in [parent1.gene, parent2.gene]:
+                        self.mutation.run(child)
             _extend(children)
         
         self.era += 1
@@ -121,8 +105,11 @@ Start Eart
         return self._adaptability_history[-1]
 
     def __call__(self, *args, **kwargs):
-        for _ in range(self.generation_size):
-            self._birth()
-            self._evaluate()
-            self._transition()
-            yield self._adaptability_history[-1]
+        try:
+            for _ in range(self.generation_size):
+                self._birth()
+                self._evaluate()
+                self._transition()
+                yield self._adaptability_history[-1]
+        except Exception as e:
+            print(e)
