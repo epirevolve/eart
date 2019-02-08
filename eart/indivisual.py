@@ -11,6 +11,7 @@ def default_counter(start=0):
 
 
 class Individual:
+    base_kind = []
     gene_size = 0
     identifier = default_counter(1)
     
@@ -22,8 +23,8 @@ class Individual:
     
     @staticmethod
     def _random_gene():
-        gene = Individual.gene_kind[:] if len(Individual.gene_kind) == Individual.gene_size\
-            else np.random.choice(Individual.gene_kind, Individual.gene_size)
+        gene = Individual.base_kind[:] if len(Individual.base_kind) == Individual.gene_size\
+            else np.random.choice(Individual.base_kind, Individual.gene_size)
         np.random.shuffle(gene)
         return gene
     

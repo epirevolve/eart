@@ -66,7 +66,7 @@ if __name__ == "__main__":
     evaluation = Evaluation(point_table).evaluate
     
     genetic = Genetic(evaluation=evaluation,
-                      gene_kind=range(len(point_table)), homo_progeny_restriction=True)
+                      base_kind=range(len(point_table)), homo_progeny_restriction=True)
     marriage_selection = MarriageSelection(selection_shuffle=True)
     marriage_selection.add(EliteSelection(), 0.05)
     marriage_selection.add(TournamentSelection(group_size=2))

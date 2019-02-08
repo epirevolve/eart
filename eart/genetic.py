@@ -6,7 +6,7 @@ from .indivisual import Individual
 
 class Genetic:
     def __init__(self, *, evaluation,
-                 gene_kind, gene_size=None,
+                 base_kind, gene_size=None,
                  gene_duplicatable=False, homo_progeny_restriction=False,
                  generation_size=100000, population_size=10000,
                  saturated_limit=50):
@@ -15,14 +15,14 @@ class Genetic:
         self._compatible_in_each_era = []
         self._activators: [Individual] = []
         
-        gene_kind = list(set(gene_kind))
+        base_kind = list(set(base_kind))
         if not gene_size:
-            gene_size = len(gene_kind)
+            gene_size = len(base_kind)
         self._gene_duplicatable = gene_duplicatable
-        if len(gene_kind) != gene_size:
+        if len(base_kind) != gene_size:
             self._gene_duplicatable = True
         
-        Individual.gene_kind = gene_kind
+        Individual.base_kind = base_kind
         Individual.gene_size = gene_size
         self._evaluation = evaluation
         self._homo_progeny_restriction = homo_progeny_restriction
@@ -46,7 +46,7 @@ Start Eart
     homo progeny restriction: {}
     generation size: {}
     population size: {}
-        """.format(Individual.gene_kind, Individual.gene_size, self._gene_duplicatable,
+        """.format(Individual.base_kind, Individual.gene_size, self._gene_duplicatable,
                    self._homo_progeny_restriction, self.generation_size, self.population_size))
 
     def _generate_protobiont(self):
