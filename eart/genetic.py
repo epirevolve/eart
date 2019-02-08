@@ -35,6 +35,8 @@ class Genetic:
         self.mutation = None
         self.crossover = None
         
+        self._is_compiled = False
+        
         self._saturated_limit = saturated_limit
 
         print("""
@@ -89,16 +91,21 @@ Start Eart
     def _is_terminate(self):
         return self._is_saturated() or self._is_excess_era()
 
-    def init(self):
+    def compile(self):
         self._generate_protobiont()
         self._evaluate()
+        self._is_compiled = True
         return self._compatible_in_each_era[-1]
     
     def _run(self):
+        if not self._is_compiled:
+            raise ValueError('not compiled yet')
         self._birth()
         self._evaluate()
         self._transition()
-        return self._compatible_in_each_era[-1]
+        compatible = self._compatible_in_each_era[-1]
+        print(compatible.adaptability)
+        return compatible
         
     def run_by_step(self):
         try:

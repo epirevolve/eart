@@ -89,7 +89,7 @@ if __name__ == "__main__":
     crossover.compile()
     genetic.crossover = crossover
     
-    i = genetic.init()
+    i = genetic.compile()
     canvas.draw_point([point_table[i] for i in i.gene])
     canvas.draw_path([point_table[i] for i in i.gene])
     print("era: {:>4}, adaptability: {}, elapsed time {}".format(genetic.era, i.adaptability, 0))
