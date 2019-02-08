@@ -9,10 +9,10 @@ class Genetic:
                  gene_kind, gene_size=None,
                  gene_duplicatable=False, homo_progeny_restriction=False,
                  generation_size=100000, population_size=10000,
-                 saturated_limit=10):
+                 saturated_limit=50):
         self.era = 1
 
-        self._adaptability_history = []
+        self._compatible_in_each_era = []
         self._activators: [Individual] = []
         
         gene_kind = list(set(gene_kind))
@@ -72,15 +72,16 @@ Start Eart
     def _evaluate(self):
         for i in self._activators:
             if not i.adaptability:
-                self._evaluation(i)
+                i.adaptability = self._evaluation(i.gene)
         self._activators = sorted(self._activators, key=lambda x: x.adaptability, reverse=True)
-        self._adaptability_history.append(self._activators[0])
+        self._compatible_in_each_era.append(self._activators[0])
 
     def _transition(self):
         self._activators = self.transition_selection.run(self._activators)
     
     def _is_saturated(self):
-        return len(set(self._adaptability_history[:-self._saturated_limit])) == 1
+        return self.era > self._saturated_limit \
+               and len(set(map(lambda x: x.adaptability, self._compatible_in_each_era[-self._saturated_limit:]))) == 1
 
     def _is_excess_era(self):
         return self.era > self.generation_size
@@ -91,13 +92,13 @@ Start Eart
     def init(self):
         self._generate_protobiont()
         self._evaluate()
-        return self._adaptability_history[-1]
+        return self._compatible_in_each_era[-1]
     
     def _run(self):
         self._birth()
         self._evaluate()
         self._transition()
-        return self._adaptability_history[-1]
+        return self._compatible_in_each_era[-1]
         
     def run_by_step(self):
         try:
@@ -117,4 +118,4 @@ Start Eart
         except Exception as e:
             print(e)
         else:
-            return self._adaptability_history[-1]
+            return self._compatible_in_each_era[-1]

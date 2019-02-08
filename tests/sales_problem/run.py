@@ -44,7 +44,7 @@ class Evaluation:
         return n
 
     def evaluate(self, t):
-        t.adaptability = 1 / self._path_length(t.gene)
+        return 1 / self._path_length(t)
 
 
 if __name__ == "__main__":
