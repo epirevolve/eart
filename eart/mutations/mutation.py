@@ -20,7 +20,7 @@ class Mutation(BackFunction):
         self._mutation_rate += self._proliferate_rate
     
     def _run(self, individual):
-        if not self._compiled:
+        if not self.is_compiled:
             raise ValueError('compile is required before run')
         methods, weights = zip(*self._methods.values())
         method = np.random.choice(methods, p=weights)

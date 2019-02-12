@@ -20,7 +20,7 @@ class Selection(BackFunction):
     def _run(self, population):
         if not self._methods:
             raise ValueError('selection is not assigned')
-        if not self._compiled:
+        if not self.is_compiled:
             raise ValueError('compile is required before run')
         survivors = []
         remains = population[:]
@@ -37,18 +37,18 @@ class Selection(BackFunction):
         raise NotImplementedError()
 
 
-class MarriageSelection(Selection):
+class ParentSelection(Selection):
     def run(self, population):
         survivors = self._run(population)
         while len(survivors) >= 2:
             yield survivors.pop(0), survivors.pop(0)
 
 
-class TransitionSelection(Selection):
+class SurvivorSelection(Selection):
     def __init__(self, *, const_population_size=None,
                  random_group=False, selection_shuffle=False):
-        super(TransitionSelection, self).__init__(random_group=random_group,
-                                                  selection_shuffle=selection_shuffle)
+        super(SurvivorSelection, self).__init__(random_group=random_group,
+                                                selection_shuffle=selection_shuffle)
         self._const_population_size = const_population_size
     
     def run(self, population):

@@ -9,7 +9,7 @@ def read_text(file):
         return int(_s[0]), int(_s[1])
     with open(file, 'r') as f:
         data = f.readlines()
-    return [(_separate(a)) for a in data]
+    return [_separate(a) for a in data]
 
 
 def read_json(file):

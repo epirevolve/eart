@@ -4,11 +4,11 @@
 class BackFunction:
     def __init__(self):
         self._methods = {}
-        self._compiled = False
+        self.is_compiled = False
     
     def add(self, method, weight=None):
         self._methods[type(method)] = (method, weight)
-        self._compiled = False
+        self.is_compiled = False
 
     def compile(self):
         methods, weights = zip(*self._methods.values())
@@ -21,4 +21,4 @@ class BackFunction:
             weights = [x or r_weight for x in weights]
         if sum(weights) != 1:
             raise ValueError('sum of weight must be 1')
-        self._compiled = True
+        self.is_compiled = True

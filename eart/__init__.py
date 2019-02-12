@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .selections.selection import (
-    MarriageSelection, TransitionSelection
+    ParentSelection, SurvivorSelection
 )
 from .mutations.mutation import Mutation
 from .crossovers.crossover import Crossover
