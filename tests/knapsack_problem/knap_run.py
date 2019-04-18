@@ -16,6 +16,7 @@ from eart.mutations import WholeMutation
 from eart.crossovers import SinglePointCrossover
 from eart.crossovers import MultiPointCrossover
 from eart.crossovers import UniformityCrossover
+from eart.crossovers import TwoPointCrossover
 
 from tests.knapsack_problem import read_knap_file as rtf
 
@@ -63,6 +64,7 @@ if __name__ == '__main__':
     crossover.add(SinglePointCrossover(), 0.1)
     crossover.add(MultiPointCrossover())
     crossover.add(UniformityCrossover())
+    crossover.add(TwoPointCrossover())
     genetic.crossover = crossover
     
     i = genetic.compile()

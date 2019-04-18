@@ -11,10 +11,10 @@ from . import Crossover
 
 class Genetic:
     def __init__(self, *, evaluation,
-                 base_kind, gene_size=None,
+                 base_kind=None, gene_size=None, protobionts=None,
                  gene_duplicatable=False, homo_progeny_restriction=False,
                  generation_size=100000, population_size=10000,
-                 saturated_limit=50, debug=False):
+                 saturated_limit=50, terminate_evaluation=None, debug=False):
         self.era = 1
 
         self._compatible_in_each_era = []
@@ -29,6 +29,9 @@ class Genetic:
         
         Individual.base_kind = base_kind
         Individual.gene_size = gene_size
+        
+        self._activators = protobionts
+        
         self._evaluation = evaluation
         self._homo_progeny_restriction = homo_progeny_restriction
         
@@ -43,6 +46,7 @@ class Genetic:
         self._is_compiled = False
         
         self._saturated_limit = saturated_limit
+        self._terminate_evaluation = terminate_evaluation or True
         
         self._debug = debug
 
@@ -96,9 +100,18 @@ Start Eart
         return self.era > self.generation_size
 
     def _is_terminate(self):
-        return self._is_saturated() or self._is_excess_era()
+        return self._terminate_evaluation and (self._is_saturated() or self._is_excess_era())
 
     def compile(self):
+        if not self.parent_selection:
+            raise Exception('parent selection is not assigned')
+        if not self.survivor_selection:
+            raise Exception('survivor selection is not assigned')
+        if not self.mutation:
+            raise Exception('mutation is not assigned')
+        if not self.crossover:
+            raise Exception('crossover is not assigned')
+        
         if not self.parent_selection.is_compiled:
             self.parent_selection.compile()
         if not self.survivor_selection.is_compiled:
@@ -108,7 +121,8 @@ Start Eart
         if not self.crossover.is_compiled:
             self.crossover.compile()
         
-        self._generate_protobiont()
+        if not self._activators:
+            self._generate_protobiont()
         self._evaluate()
         self._is_compiled = True
         return self._compatible_in_each_era[-1]
@@ -123,7 +137,7 @@ Start Eart
         if self._debug:
             print('era: {:>4}, adaptability: {}'.format(self.era, compatible.adaptability))
         return compatible
-        
+    
     def run_by_step(self):
         try:
             for _ in range(self.generation_size):

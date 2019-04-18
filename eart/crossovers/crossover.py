@@ -5,9 +5,6 @@ from ..background import BackFunction
 
 
 class Crossover(BackFunction):
-    def __init__(self):
-        super(Crossover, self).__init__()
-    
     def run(self, gene1, gene2):
         if not self._methods:
             raise ValueError('selection is not assigned')
