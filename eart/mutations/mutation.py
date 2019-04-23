@@ -27,5 +27,9 @@ class Mutation(BackFunction):
         method.run(individual)
     
     def run(self, individual):
-        if np.random.rand() < self._mutation_rate:
-            self._run(individual)
+        try:
+            if np.random.rand() < self._mutation_rate:
+                self._run(individual)
+        except Exception as e:
+            print("### error on mutation process.")
+            print(e)

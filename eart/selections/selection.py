@@ -39,9 +39,13 @@ class Selection(BackFunction):
 
 class ParentSelection(Selection):
     def run(self, population):
-        survivors = self._run(population)
-        while len(survivors) >= 2:
-            yield survivors.pop(0), survivors.pop(0)
+        try:
+            survivors = self._run(population)
+            while len(survivors) >= 2:
+                yield survivors.pop(0), survivors.pop(0)
+        except Exception as e:
+            print("### error on parent selection process.")
+            print(e)
 
 
 class SurvivorSelection(Selection):
@@ -52,11 +56,15 @@ class SurvivorSelection(Selection):
         self._const_population_size = const_population_size
     
     def run(self, population):
-        survivors = self._run(population)
-        if self._const_population_size:
-            remains = population[:]
-            while len(survivors) < self._const_population_size:
-                remains = list(set(remains) - set(survivors))
-                survivors.extend(self._run(remains))
-            survivors = survivors[:self._const_population_size]
-        return survivors
+        try:
+            survivors = self._run(population)
+            if self._const_population_size:
+                remains = population[:]
+                while len(survivors) < self._const_population_size:
+                    remains = list(set(remains) - set(survivors))
+                    survivors.extend(self._run(remains))
+                survivors = survivors[:self._const_population_size]
+            return survivors
+        except Exception as e:
+            print("### error on survivor selection process.")
+            print(e)

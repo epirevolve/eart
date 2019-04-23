@@ -14,7 +14,7 @@ class Genetic:
                  base_kind=None, gene_size=None, protobionts=None,
                  gene_duplicatable=False, homo_progeny_restriction=False,
                  generation_size=100000, population_size=10000,
-                 saturated_limit=50, terminate_evaluation=None, debug=False):
+                 saturated_limit=50, debug=False):
         self.era = 1
 
         self._compatible_in_each_era = []
@@ -46,11 +46,10 @@ class Genetic:
         self._is_compiled = False
         
         self._saturated_limit = saturated_limit
-        self._terminate_evaluation = terminate_evaluation or True
         
         self._debug = debug
 
-        print("""
+        self._debug_print("""
 Start Eart
 ==== parameters ====
     gene kind: {}
@@ -61,6 +60,10 @@ Start Eart
     population size: {}
         """.format(Individual.base_kind, Individual.gene_size, self._gene_duplicatable,
                    self._homo_progeny_restriction, self.generation_size, self.population_size))
+
+    def _debug_print(self, message):
+        if self._debug:
+            print(message)
 
     def _generate_protobiont(self):
         self._activators = [Individual.protobiont(self.era) for _ in range(self.population_size)]
@@ -75,7 +78,7 @@ Start Eart
             map(lambda x: self.mutation.run(x), children)
             if self._homo_progeny_restriction:
                 for child in children:
-                    if child.gene in [parent1.gene, parent2.gene]:
+                    if ''.join(child.gene) in [''.join(parent1.gene), ''.join(parent2.gene)]:
                         self.mutation.run(child)
             _extend(children)
         
@@ -100,7 +103,7 @@ Start Eart
         return self.era > self.generation_size
 
     def _is_terminate(self):
-        return self._terminate_evaluation and (self._is_saturated() or self._is_excess_era())
+        return self._is_saturated() or self._is_excess_era()
 
     def compile(self):
         if not self.parent_selection:
@@ -134,8 +137,7 @@ Start Eart
         self._evaluate()
         self._transition()
         compatible = self._compatible_in_each_era[-1]
-        if self._debug:
-            print('era: {:>4}, adaptability: {}'.format(self.era, compatible.adaptability))
+        self._debug_print('era: {:>4}, adaptability: {}'.format(self.era, compatible.adaptability))
         return compatible
     
     def run_by_step(self):
@@ -145,7 +147,10 @@ Start Eart
                     break
                 yield self._run()
         except Exception as e:
+            print('## error on eart')
             print(e)
+            import traceback
+            traceback.print_exc()
     
     def run(self):
         try:
@@ -154,6 +159,14 @@ Start Eart
                     break
                 self._run()
         except Exception as e:
+            print('## error on eart')
             print(e)
+            import traceback
+            traceback.print_exc()
         else:
+            self._debug_print("""
+Eart is finished
+====================
+    the most adapted score is {}
+            """.format(self._compatible_in_each_era[-1].adaptability))
             return self._compatible_in_each_era[-1]
