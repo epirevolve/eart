@@ -78,7 +78,8 @@ Start Eart
             map(lambda x: self.mutation.run(x), children)
             if self._homo_progeny_restriction:
                 for child in children:
-                    if ''.join(child.gene) in [''.join(parent1.gene), ''.join(parent2.gene)]:
+                    if ''.join(map(str, child.gene)) in\
+                            [''.join(map(str, parent1.gene)), ''.join(map(str, parent2.gene))]:
                         self.mutation.run(child)
             _extend(children)
         
