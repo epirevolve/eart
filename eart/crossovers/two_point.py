@@ -2,10 +2,12 @@
 
 import numpy as np
 
+from ..utility import min_len
+
 
 class TwoPointCrossover:
     def run(self, gene1, gene2):
-        gene_size = min(len(gene1), len(gene2))
+        gene_size = min_len(gene1, gene2)
         points = [np.random.randint(0, gene_size) for _ in range(2)]
         point1 = min(*points)
         point2 = max(*points)
