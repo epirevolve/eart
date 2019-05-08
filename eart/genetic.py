@@ -18,19 +18,20 @@ class Genetic:
         self.era = 1
 
         self._compatible_in_each_era = []
-        self._activators: [Individual] = []
+        self._activators = protobionts if protobionts else []
         
-        base_kind = list(set(base_kind))
+        if not protobionts and not base_kind:
+            raise ValueError('protobionts or base_kind is required.')
+        
+        base_kind = list(set(base_kind)) if base_kind else list(set([y for x in protobionts for y in x]))
         if not gene_size:
             gene_size = len(base_kind)
         self._gene_duplicatable = gene_duplicatable
-        if len(base_kind) != gene_size:
+        if len(base_kind) <= gene_size:
             self._gene_duplicatable = True
         
         Individual.base_kind = base_kind
         Individual.gene_size = gene_size
-        
-        self._activators = protobionts
         
         self._evaluation = evaluation
         self._homo_progeny_restriction = homo_progeny_restriction
@@ -38,10 +39,10 @@ class Genetic:
         self.generation_size = generation_size
         self.population_size = population_size
         
-        self.parent_selection: ParentSelection = None
-        self.survivor_selection: SurvivorSelection = None
-        self.mutation: Mutation = None
-        self.crossover: Crossover = None
+        self.parent_selection = None
+        self.survivor_selection = None
+        self.mutation = None
+        self.crossover = None
         
         self._is_compiled = False
         
@@ -107,14 +108,14 @@ Start Eart
         return self._is_saturated() or self._is_excess_era()
 
     def compile(self):
-        if not self.parent_selection:
-            raise Exception('parent selection is not assigned')
-        if not self.survivor_selection:
-            raise Exception('survivor selection is not assigned')
-        if not self.mutation:
-            raise Exception('mutation is not assigned')
-        if not self.crossover:
-            raise Exception('crossover is not assigned')
+        if not self.parent_selection or not isinstance(self.parent_selection, ParentSelection):
+            raise ValueError('parent selection is not assigned properly')
+        if not self.survivor_selection or not isinstance(self.survivor_selection, SurvivorSelection):
+            raise ValueError('survivor selection is not assigned properly')
+        if not self.mutation or not isinstance(self.mutation, Mutation):
+            raise ValueError('mutation is not assigned properly')
+        if not self.crossover or not isinstance(self.crossover, Crossover):
+            raise ValueError('crossover is not assigned properly')
         
         if not self.parent_selection.is_compiled:
             self.parent_selection.compile()
