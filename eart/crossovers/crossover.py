@@ -10,6 +10,10 @@ class Crossover(BackFunction):
             raise ValueError('selection is not assigned')
         if not self.is_compiled:
             raise ValueError('compile is required before run')
-        methods, weights = zip(*self._methods.values())
-        method = np.random.choice(methods, p=weights)
-        return method.run(gene1, gene2)
+        try:
+            methods, weights = zip(*self._methods.values())
+            method = np.random.choice(methods, p=weights)
+            return method.run(gene1, gene2)
+        except Exception as e:
+            print("### error on crossover process.")
+            print(e)

@@ -14,44 +14,43 @@ class Genetic:
                  base_kind=None, gene_size=None, protobionts=None,
                  gene_duplicatable=False, homo_progeny_restriction=False,
                  generation_size=100000, population_size=10000,
-                 saturated_limit=50, terminate_evaluation=None, debug=False):
+                 saturated_limit=50, debug=False):
         self.era = 1
 
         self._compatible_in_each_era = []
-        self._activators: [Individual] = []
+        self._activators = protobionts if protobionts else []
         
-        base_kind = list(set(base_kind))
+        if not protobionts and not base_kind:
+            raise ValueError('protobionts or base_kind is required.')
+
+        base_kind = list(set(base_kind)) if base_kind else list(set([y for x in protobionts for y in x]))
         if not gene_size:
             gene_size = len(base_kind)
         self._gene_duplicatable = gene_duplicatable
-        if len(base_kind) != gene_size:
+        if len(base_kind) <= gene_size:
             self._gene_duplicatable = True
         
         Individual.base_kind = base_kind
         Individual.gene_size = gene_size
-        
-        self._activators = protobionts
-        
+
         self._evaluation = evaluation
         self._homo_progeny_restriction = homo_progeny_restriction
         
         self.generation_size = generation_size
         self.population_size = population_size
         
-        self.parent_selection: ParentSelection = None
-        self.survivor_selection: SurvivorSelection = None
-        self.mutation: Mutation = None
-        self.crossover: Crossover = None
+        self.parent_selection = None
+        self.survivor_selection = None
+        self.mutation = None
+        self.crossover = None
         
         self._is_compiled = False
         
         self._saturated_limit = saturated_limit
-        self._terminate_evaluation = terminate_evaluation or True
         
         self._debug = debug
 
-        if self._debug:
-            print("""
+        self._debug_print("""
 Start Eart
 ==== parameters ====
     gene kind: {}
@@ -62,6 +61,10 @@ Start Eart
     population size: {}
         """.format(Individual.base_kind, Individual.gene_size, self._gene_duplicatable,
                    self._homo_progeny_restriction, self.generation_size, self.population_size))
+
+    def _debug_print(self, message):
+        if self._debug:
+            print(message)
 
     def _generate_protobiont(self):
         self._activators = [Individual.protobiont(self.era) for _ in range(self.population_size)]
@@ -76,7 +79,8 @@ Start Eart
             map(lambda x: self.mutation.run(x), children)
             if self._homo_progeny_restriction:
                 for child in children:
-                    if child.gene in [parent1.gene, parent2.gene]:
+                    if ''.join(map(str, child.gene)) in\
+                            [''.join(map(str, parent1.gene)), ''.join(map(str, parent2.gene))]:
                         self.mutation.run(child)
             _extend(children)
         
@@ -101,17 +105,17 @@ Start Eart
         return self.era > self.generation_size
 
     def _is_terminate(self):
-        return self._terminate_evaluation and (self._is_saturated() or self._is_excess_era())
+        return self._is_saturated() or self._is_excess_era()
 
     def compile(self):
-        if not self.parent_selection:
-            raise Exception('parent selection is not assigned')
-        if not self.survivor_selection:
-            raise Exception('survivor selection is not assigned')
-        if not self.mutation:
-            raise Exception('mutation is not assigned')
-        if not self.crossover:
-            raise Exception('crossover is not assigned')
+        if not self.parent_selection or not isinstance(self.parent_selection, ParentSelection):
+            raise ValueError('parent selection is not assigned properly')
+        if not self.survivor_selection or not isinstance(self.survivor_selection, SurvivorSelection):
+            raise ValueError('survivor selection is not assigned properly')
+        if not self.mutation or not isinstance(self.mutation, Mutation):
+            raise ValueError('mutation is not assigned properly')
+        if not self.crossover or not isinstance(self.crossover, Crossover):
+            raise ValueError('crossover is not assigned properly')
         
         if not self.parent_selection.is_compiled:
             self.parent_selection.compile()
@@ -135,8 +139,7 @@ Start Eart
         self._evaluate()
         self._transition()
         compatible = self._compatible_in_each_era[-1]
-        if self._debug:
-            print('era: {:>4}, adaptability: {}'.format(self.era, compatible.adaptability))
+        self._debug_print('era: {:>4}, adaptability: {}'.format(self.era, compatible.adaptability))
         return compatible
     
     def run_by_step(self):
@@ -146,8 +149,11 @@ Start Eart
                     break
                 yield self._run()
         except Exception as e:
+            print('## error on eart')
             print(e)
-    
+            import traceback
+            traceback.print_exc()
+
     def run(self):
         try:
             for _ in range(self.generation_size):
@@ -155,6 +161,14 @@ Start Eart
                     break
                 self._run()
         except Exception as e:
+            print('## error on eart')
             print(e)
+            import traceback
+            traceback.print_exc()
         else:
+            self._debug_print("""
+Eart is finished
+====================
+    the most adapted score is {}
+            """.format(self._compatible_in_each_era[-1].adaptability))
             return self._compatible_in_each_era[-1]
