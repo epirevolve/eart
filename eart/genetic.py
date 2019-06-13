@@ -50,7 +50,8 @@ class Genetic:
         
         self._debug = debug
 
-        print("""
+        if self._debug:
+            print("""
 Start Eart
 ==== parameters ====
     gene kind: {}
