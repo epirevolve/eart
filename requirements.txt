@@ -1,6 +1,6 @@
 atomicwrites==1.2.1
 attrs==18.2.0
-joblib==0.13.1
+joblib==1.2.0
 more-itertools==5.0.0
 numpy==1.16.0
 pluggy==0.8.1
